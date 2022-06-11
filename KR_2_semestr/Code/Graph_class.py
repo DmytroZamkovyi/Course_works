@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 class TGraph:
     # Ініціалізація
     def __init__(self, size: int, method: int, start: int, finish: int, matrix: []):
+    def __init__(self, size: int, method: int, start: int, finish: int, matrix: []) -> None:
 
         # __size   - Кількість вершин
         # __method - Метод вирішення (1 - дейкстри, 2 - Беллмана-Форда)
@@ -55,7 +56,7 @@ class TGraph:
         self.__tops[self.__start].path = [self.__start]
 
     # Метод Дейкстри
-    def __dijkstra(self) -> int:
+    def __dijkstra(self) -> None:
 
         # w         - поточний елемент
         # for_check - масив для задання перевірки елементів
@@ -67,6 +68,7 @@ class TGraph:
         for_check = []
         for i in range(self.__size):
             if w == self.__finish:
+                print('Кількість ітерацій ', i)
                 return
             for_check.clear()
             tops_num = [(tops[0]) for tops in self.__tops[w].output_top]
@@ -85,30 +87,30 @@ class TGraph:
             self.__tops[w].checked = True
 
     # Метод Беллмана-Форда
-    def __bellman_ford(self) -> int:
+    def __bellman_ford(self) -> None:
         # Масив кортежей вершин для зручності обробки алгоритмом
         edge = []
         for i in range(self.__size):
             edge = edge + [(i, tops[0], tops[1]) for tops in self.__tops[i].output_top]
 
+        statistics = 1
         # Рахуємо довжину шляху і сам шлях
         for i in range(self.__size - 1):
             for v1, v2, s in edge:
+                statistics += 1
                 if self.__tops[v1].size != float('inf') and self.__tops[v1].size + s < self.__tops[v2].size:
                     self.__tops[v2].size = self.__tops[v1].size + s
                     self.__tops[v2].path = self.__tops[v1].path + [v2]
+        print('Кількість ітерацій ', statistics)
 
         # Перевіряємо на наявність від'ємних циклів
         for v1, v2, s in edge:
             if self.__tops[v1].size != float('inf') and self.__tops[v1].size + s < self.__tops[v2].size:
                 self.__tops[v2].size = float('-inf')
-                self.__tops[v2].path = ['-']
+                self.__tops[v2].path = ['']
 
     # Функція для вирішення графа заданим методом
-    def solve_graph(self) -> int:
-
-        # Повертає True у випадку правильності обробки алгоритму, False - в випадку виникнення циклу з нескінченно малим шляхом
-
+    def solve_graph(self) -> None:
         if self.__method == 1:  # Метод Дейкстри
             self.__dijkstra()
         else:  # Метод Беллмана-Форда
@@ -121,18 +123,6 @@ class TGraph:
                 'start': self.__start,
                 'finish': self.__finish,
                 'tops': [(top.info()) for top in self.__tops]}
-
-    # Генерація картинки графа
-    def gr_image_output(self, res) -> None:
-        g = nx.MultiDiGraph()
-
-        [g.add_node(i) for i in range(1, self.__size+1)]
-
-        for i in range(self.__size):
-            [g.add_edge(i+1, tops[0]+1, tops[1]) for tops in self.__tops[i].output_top]
-
-        nx.draw(g, with_labels=True)
-        plt.savefig('graf.png')
 
     # Геттери
     @property
@@ -154,3 +144,26 @@ class TGraph:
     @property
     def tops(self) -> {}:
         return [(i.info()) for i in self.__tops]
+
+
+# Клас малюнка графа
+class Draw:
+    # Клас малюнка графа
+    def __init__(self, gr: TGraph) -> None:
+        # __size - кількість вершин
+        # __tops - вершини графа
+
+        self.__size = gr.size
+        self.__tops = gr.tops
+
+    # Намалювати граф
+    def draw_gr(self) -> None:
+        g = nx.MultiDiGraph()
+
+        [g.add_node(i) for i in range(1, self.__size + 1)]
+
+        for i in range(self.__size):
+            [g.add_edge(i + 1, tops[0] + 1, tops[1]) for tops in self.__tops[i]['output_top']]
+
+        nx.draw(g, with_labels=True)
+        plt.savefig('graf.png')

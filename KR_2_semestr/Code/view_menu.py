@@ -7,40 +7,48 @@ class App:
     def __init__(self, root):
         self.__matrix_val = []
 
+        # Виведення графа
         def gr_output(len, path, data):
             def save_res():
                 save_res_in_file('res', data)
                 text_save.pack()
 
+            # Видалення рамок 1, 2 та 3
             frame_input_1.destroy()
             frame_input_2.destroy()
             frame_input_3.destroy()
             btn_gen.destroy()
 
+            # Зміна розміру вікна
             width = 660
             height = 600
             root.geometry('%dx%d' % (width, height))
 
+            # Рамка для виведення графа
             frame_output = Frame(root)
             frame_output['bg'] = '#ffffff'
             frame_output.place(x=10, y=10)
 
+            # Зображення графа
             img = PhotoImage(file='graf.png')
             lb_img = Label(frame_output)
             lb_img.image = img
             lb_img['image'] = lb_img.image
             lb_img.pack()
 
+            # Текст про довжину і шлях в графі
             out = Label(frame_output)
             out['text'] = f'Довжина: {len}\nШлях: {path}'
             out['bg'] = '#ffffff'
             out.pack()
 
+            # Кнопка збереження
             btn_save = Button(frame_output)
             btn_save['text'] = 'Зберегти результат'
             btn_save['command'] = save_res
             btn_save.pack()
 
+            # Повідомлення про успішне збереження
             text_save = Label(frame_output)
             text_save['text'] = 'Успішно збережено у файл res'
             text_save['bg'] = '#ffffff'
@@ -51,13 +59,19 @@ class App:
             scale_finish['state'] = DISABLED
             gr = TGraph(scale_size.get(), method.get(), scale_start.get() - 1, scale_finish.get() - 1,
                         self.__matrix_val)
-            res = gr.solve_graph()
-            gr.gr_image_output(res)
+            gr.solve_graph()
+            img = Draw(gr)
+            img.draw_gr()
 
             path = ''
-            for i in range(len(gr.tops[gr.finish]['path'])):
-                path = path + (str(gr.tops[gr.finish]['path'][i] + 1) + ' -> ')
-            path = path[:len(path) - 5] + str(gr.finish + 1)
+            if not gr.tops[gr.finish]['path']:
+                path = 'inf'
+            elif gr.tops[gr.finish]['path'][0] == '':
+                path = '-'
+            else:
+                for i in range(len(gr.tops[gr.finish]['path'])):
+                    path = path + (str(int(gr.tops[gr.finish]['path'][i]) + 1) + ' -> ')
+                path = path[:len(path) - 5] + str(gr.finish + 1)
             gr_output(gr.tops[gr.finish]['size'], path, gr.info())
 
         # Функція, яка виводить повзунки для початкової і кінцевої вершини та публікує рамку 3
@@ -116,7 +130,6 @@ class App:
 
             btn_set['state'] = DISABLED
             top = Toplevel()
-            top.title = 'Матриця ваг'
             input_val = [[(Entry(top, bg='#ffffff', width=3)) for i in range(scale_size.get())] for j in
                          range(scale_size.get())]
             [[(input_val[i][j].grid(column=i, row=j)) for i in range(scale_size.get())] for j in
