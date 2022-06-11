@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 # Клас графа
 class TGraph:
     # Ініціалізація
-    def __init__(self, size: int, method: int, start: int, finish: int, matrix: []):
     def __init__(self, size: int, method: int, start: int, finish: int, matrix: []) -> None:
 
         # __size   - Кількість вершин
